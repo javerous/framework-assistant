@@ -279,10 +279,8 @@ NS_ASSUME_NONNULL_BEGIN
 */
 #pragma mark - SMAssistantController - Proxy
 
-- (void)setNextPanelID:(NSString *)panelID
+- (void)setNextPanelID:(nullable NSString *)panelID
 {
-	NSAssert(panelID, @"panelID is nil");
-	
 	dispatch_async(dispatch_get_main_queue(), ^{
 
 		_nextID = panelID;
