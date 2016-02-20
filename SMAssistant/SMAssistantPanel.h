@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol SMAssistantProxy <NSObject>
 
-- (void)setNextPanelID:(NSString *)panelID;
+- (void)setNextPanelID:(nullable NSString *)panelID;
 - (void)setIsLastPanel:(BOOL)last;
 - (void)setDisableContinue:(BOOL)disabled;
 
