@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "756D6A6E9ABC242A5612C2C12C4467564F55DE1B",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "756D6A6E9ABC242A5612C2C12C4467564F55DE1B" : 0,
+    "90A9F36234C4CA39B2587C45DFB059A6E84873F6" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "D0C3D916-7B88-435C-ABDD-911EF6D1168B",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "756D6A6E9ABC242A5612C2C12C4467564F55DE1B" : "SMAssistant\/",
+    "90A9F36234C4CA39B2587C45DFB059A6E84873F6" : ".."
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "SMAssistant",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "SMAssistant.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:javerous\/framework-assistant.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "756D6A6E9ABC242A5612C2C12C4467564F55DE1B"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:javerous\/TorProxifier.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "90A9F36234C4CA39B2587C45DFB059A6E84873F6"
+    }
+  ]
+}
