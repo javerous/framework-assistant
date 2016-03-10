@@ -31,7 +31,13 @@ NS_ASSUME_NONNULL_BEGIN
 */
 #pragma mark - Types
 
-typedef void (^SMAssistantCompletionBlock)(id _Nullable context);
+typedef enum
+{
+	SMAssistantCompletionTypeCanceled,	// context = nil
+	SMAssistantCompletionTypeDone		// context = last panel returned content.
+} SMAssistantCompletionType;
+
+typedef void (^SMAssistantCompletionBlock)(SMAssistantCompletionType type, id _Nullable context);
 
 
 
@@ -40,13 +46,10 @@ typedef void (^SMAssistantCompletionBlock)(id _Nullable context);
 */
 #pragma mark - SMAssistantController
 
-@interface SMAssistantController : NSWindowController
+@interface SMAssistantController : NSObject
 
 // -- Instance --
-+ (SMAssistantController *)startAssistantWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback;
-
-// -- Properties --
-@property (strong, nullable) dispatch_block_t cancelHandler; // Default is to terminate app.
++ (void)startAssistantWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback;
 
 @end
 

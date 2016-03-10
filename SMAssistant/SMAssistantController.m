@@ -39,11 +39,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /*
-** SMAssistantController - Private
+** SMAssistantWindowController - Interface
 */
-#pragma mark - SMAssistantController - Private
+#pragma mark - SMAssistantWindowController - Interface
 
-@interface SMAssistantController () <SMAssistantProxy>
+@interface SMAssistantWindowController : NSWindowController <SMAssistantProxy>
 {
 	NSArray					*_panels;
 	NSMutableDictionary		*_panelsClass;
@@ -57,8 +57,11 @@ NS_ASSUME_NONNULL_BEGIN
 	
 	SMAssistantCompletionBlock	_handler;
 	
-	SMAssistantController *_selfRetain;
+	SMAssistantWindowController *_selfRetain;
 }
+
+// -- Instance --
+- (id)initWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback;
 
 // -- Properties --
 @property (strong, nonatomic)	IBOutlet NSTextField	*mainTitle;
@@ -71,7 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (IBAction)doNext:(id)sender;
 
 // -- Tools --
-- (void)_switchToPanel:(NSString *)panelID;
+- (void)_switchToPanel:(NSString *)panelID withContent:(nullable id)content;
 - (void)_checkNextButton;
 
 @end
@@ -85,22 +88,31 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation SMAssistantController
 
-
-/*
-** SMAssistantController - Instance
-*/
-#pragma mark - SMAssistantController - Instance
-
-+ (SMAssistantController *)startAssistantWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback
++ (void)startAssistantWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback
 {
-	SMAssistantController *assistant = [[SMAssistantController alloc] initWithPanels:panels completionHandler:callback];
+	SMAssistantWindowController *assistant = [[SMAssistantWindowController alloc] initWithPanels:panels completionHandler:callback];
 	
 	dispatch_async(dispatch_get_main_queue(), ^{
 		[assistant showWindow:nil];
 	});
-	
-	return assistant;
 }
+
+@end
+
+
+
+/*
+** SMAssistantWindowController
+*/
+#pragma mark - SMAssistantWindowController
+
+@implementation SMAssistantWindowController
+
+
+/*
+** SMAssistantWindowController - Instance
+*/
+#pragma mark - SMAssistantWindowController - Instance
 
 - (id)initWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback
 {
@@ -124,9 +136,6 @@ NS_ASSUME_NONNULL_BEGIN
 		// Handle panels.
 		_panels = panels;
 		
-		//Default cancel.
-		_cancelHandler = ^{ [[NSApplication sharedApplication] terminate:nil]; };
-		
 		// Self retain.
 		_selfRetain = self;
 	}
@@ -134,19 +143,24 @@ NS_ASSUME_NONNULL_BEGIN
 	return self;
 }
 
+- (void)dealloc
+{
+	//NSLog(@"SMAssistantWindowController dealloc");
+}
+
 
 
 /*
-** SMAssistantController - NSWindowController
+** SMAssistantWindowController - NSWindowController
 */
-#pragma mark - SMAssistantController - NSWindowController
+#pragma mark - SMAssistantWindowController - NSWindowController
 
 - (void)windowDidLoad
 {
 	// Show first pannel.
 	Class <SMAssistantPanel> class = _panels[0];
 	
-	[self _switchToPanel:[class identifiant]];
+	[self _switchToPanel:[class identifiant] withContent:nil];
 	
 	// Show window.
 	[self.window center];
@@ -155,21 +169,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /*
-** SMAssistantController - IBAction
+** SMAssistantWindowController - IBAction
 */
-#pragma mark - SMAssistantController - IBAction
+#pragma mark - SMAssistantWindowController - IBAction
 
 - (IBAction)doCancel:(id)sender
 {
 	// Close window.
-	[self.window orderOut:sender];
+	[self close];
 
 	// Call cancel handler.
-	dispatch_block_t cancelHandler = self.cancelHandler;
-	
-	if (cancelHandler)
-		cancelHandler();
-	
+	if (_handler)
+		_handler(SMAssistantCompletionTypeCanceled, nil);
+
 	// Remove self retain.
 	_selfRetain = nil;
 }
@@ -182,35 +194,38 @@ NS_ASSUME_NONNULL_BEGIN
 		return;
 	}
 	
+	id content = [_currentPanel content];
+
 	if (_isLast)
 	{
-		id content = [_currentPanel content];
-		
 		if (_handler)
-			_handler(content);
+			_handler(SMAssistantCompletionTypeDone, content);
+		
+		_currentPanel.proxy = (id)[NSNull null];
+		_currentPanel.previousContent = nil;
 		
 		_handler = nil;
 		_currentPanel = nil;
 
-		[self.window orderOut:sender];
+		[self close];
 		
 		_selfRetain = nil;
 	}
 	else
 	{
 		// Switch.
-		[self _switchToPanel:_nextID];
+		[self _switchToPanel:_nextID withContent:content];
 	}
 }
 
 
 
 /*
-** SMAssistantController - Tools
+** SMAssistantWindowController - Tools
 */
-#pragma mark - SMAssistantController - Tools
+#pragma mark - SMAssistantWindowController - Tools
 
-- (void)_switchToPanel:(NSString *)panelID
+- (void)_switchToPanel:(NSString *)panelID withContent:(nullable id)content
 {
 	// > main queue <
 	
@@ -221,6 +236,9 @@ NS_ASSUME_NONNULL_BEGIN
 	// Remove it from current view.
 	[[_currentPanel view] removeFromSuperview];
 	
+	_currentPanel.proxy = (id)[NSNull null];
+	_currentPanel.previousContent = nil;
+	
 	// Get the panel instance.
 	id <SMAssistantPanel> panel = _panelsInstances[panelID];
 	
@@ -228,7 +246,7 @@ NS_ASSUME_NONNULL_BEGIN
 	{
 		Class <SMAssistantPanel> class = _panelsClass[panelID];
 		
-		panel = [class panelWithProxy:self];
+		panel = [class panel];
 		
 		if (panel)
 			_panelsInstances[panelID] = panel;
@@ -246,8 +264,12 @@ NS_ASSUME_NONNULL_BEGIN
 	_isLast = YES;
 	[_nextButton setEnabled:NO];
 	[_nextButton setTitle:SMLocalizedString(@"ac_next_finish", @"")];
-	[panel showPanel];
-	 
+	
+	panel.proxy = self;
+	panel.previousContent = content;
+	
+	[panel didAppear];
+	
 	// Hold the panel
 	_currentPanel = panel;
 }
@@ -261,7 +283,7 @@ NS_ASSUME_NONNULL_BEGIN
 		[_nextButton setEnabled:NO];
 		return;
 	}
-			
+	
 	if (_isLast)
 		[_nextButton setEnabled:YES];
 	else
@@ -275,9 +297,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /*
-** SMAssistantController - Proxy
+** SMAssistantWindowController - Proxy
 */
-#pragma mark - SMAssistantController - Proxy
+#pragma mark - SMAssistantWindowController - Proxy
 
 - (void)setNextPanelID:(nullable NSString *)panelID
 {
