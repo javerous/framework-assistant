@@ -48,24 +48,23 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol SMAssistantPanel <NSObject>
 
 // Instance.
-+ (id <SMAssistantPanel>)panel;
++ (id <SMAssistantPanel>)panelInstance;
 
 // Panel properties.
-+ (NSString *)identifiant;
-+ (NSString *)title;
++ (NSString *)panelIdentifier;
++ (NSString *)panelTitle;
 
 // Content.
-- (NSView *)view;
-- (nullable id)content;
+- (NSView *)panelView;
+- (nullable id)panelContent;
 
 // Context.
-@property (strong, nonatomic) id <SMAssistantProxy> proxy;
-@property (strong, nonatomic, nullable) id previousContent;
+@property (strong, nonatomic) id <SMAssistantProxy> panelProxy;
+@property (strong, nonatomic, nullable) id panelPreviousContent;
 
 
 // Life.
-- (void)didAppear;
-//- (void)showPanelWithProxy:(id <SMAssistantProxy>)proxy previousContent:(nullable id)content;
+- (void)panelDidAppear;
 
 @end
 
