@@ -131,7 +131,7 @@ NS_ASSUME_NONNULL_BEGIN
 		
 		// Handle pannels class.
 		for (Class <SMAssistantPanel> class in panels)
-			[_panelsClass setObject:class forKey:[class identifiant]];
+			[_panelsClass setObject:class forKey:[class panelIdentifier]];
 		
 		// Handle panels.
 		_panels = panels;
@@ -160,7 +160,7 @@ NS_ASSUME_NONNULL_BEGIN
 	// Show first pannel.
 	Class <SMAssistantPanel> class = _panels[0];
 	
-	[self _switchToPanel:[class identifiant] withContent:nil];
+	[self _switchToPanel:[class panelIdentifier] withContent:nil];
 	
 	// Show window.
 	[self.window center];
@@ -194,15 +194,15 @@ NS_ASSUME_NONNULL_BEGIN
 		return;
 	}
 	
-	id content = [_currentPanel content];
+	id content = [_currentPanel panelContent];
 
 	if (_isLast)
 	{
 		if (_handler)
 			_handler(SMAssistantCompletionTypeDone, content);
 		
-		_currentPanel.proxy = (id)[NSNull null];
-		_currentPanel.previousContent = nil;
+		_currentPanel.panelProxy = (id)[NSNull null];
+		_currentPanel.panelPreviousContent = nil;
 		
 		_handler = nil;
 		_currentPanel = nil;
@@ -230,14 +230,14 @@ NS_ASSUME_NONNULL_BEGIN
 	// > main queue <
 	
 	// Check that the panel is not already loaded.
-	if ([[[_currentPanel class] identifiant] isEqualToString:panelID])
+	if ([[[_currentPanel class] panelIdentifier] isEqualToString:panelID])
 		return;
 	
 	// Remove it from current view.
-	[[_currentPanel view] removeFromSuperview];
+	[[_currentPanel panelView] removeFromSuperview];
 	
-	_currentPanel.proxy = (id)[NSNull null];
-	_currentPanel.previousContent = nil;
+	_currentPanel.panelProxy = (id)[NSNull null];
+	_currentPanel.panelPreviousContent = nil;
 	
 	// Get the panel instance.
 	id <SMAssistantPanel> panel = _panelsInstances[panelID];
@@ -246,7 +246,7 @@ NS_ASSUME_NONNULL_BEGIN
 	{
 		Class <SMAssistantPanel> class = _panelsClass[panelID];
 		
-		panel = [class panel];
+		panel = [class panelInstance];
 		
 		if (panel)
 			_panelsInstances[panelID] = panel;
@@ -254,10 +254,10 @@ NS_ASSUME_NONNULL_BEGIN
 	
 	// Set the view
 	if (panel)
-		[_mainView addSubview:[panel view]];
+		[_mainView addSubview:[panel panelView]];
 	
 	// Set the title
-	_mainTitle.stringValue = [[panel class] title];
+	_mainTitle.stringValue = [[panel class] panelTitle];
 	
 	// Set the proxy
 	_nextID = nil;
@@ -265,10 +265,10 @@ NS_ASSUME_NONNULL_BEGIN
 	[_nextButton setEnabled:NO];
 	[_nextButton setTitle:SMLocalizedString(@"ac_next_finish", @"")];
 	
-	panel.proxy = self;
-	panel.previousContent = content;
+	panel.panelProxy = self;
+	panel.panelPreviousContent = content;
 	
-	[panel didAppear];
+	[panel panelDidAppear];
 	
 	// Hold the panel
 	_currentPanel = panel;
