@@ -31,7 +31,6 @@
 		E8560CE91C6165F000F27998 /* SMAssistant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMAssistant.h; sourceTree = "<group>"; };
 		E8560CEB1C6165F000F27998 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E8560D011C616B9A00F27998 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/AssistantWindow.xib; sourceTree = "<group>"; };
-		E8560D061C616BC000F27998 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/AssistantWindow.strings; sourceTree = "<group>"; };
 		E8560D071C616C4600F27998 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/AssistantWindow.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -210,7 +209,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				E8560D011C616B9A00F27998 /* Base */,
-				E8560D061C616BC000F27998 /* en */,
 				E8560D071C616C4600F27998 /* fr */,
 			);
 			name = AssistantWindow.xib;
