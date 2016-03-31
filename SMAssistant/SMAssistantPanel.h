@@ -62,9 +62,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic) id <SMAssistantProxy> panelProxy;
 @property (strong, nonatomic, nullable) id panelPreviousContent;
 
-
 // Life.
 - (void)panelDidAppear;
+
+// Events
+@optional
+- (void)canceled;
 
 @end
 

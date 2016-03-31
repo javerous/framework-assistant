@@ -177,6 +177,10 @@ NS_ASSUME_NONNULL_BEGIN
 {
 	// Close window.
 	[self close];
+	
+	// Call cancelation.
+	if ([_currentPanel respondsToSelector:@selector(canceled)])
+		[_currentPanel canceled];
 
 	// Call cancel handler.
 	if (_handler)
