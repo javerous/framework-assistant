@@ -90,10 +90,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (void)startAssistantWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback
 {
-	SMAssistantWindowController *assistant = [[SMAssistantWindowController alloc] initWithPanels:panels completionHandler:callback];
+	CFRunLoopRef runLoop = CFRunLoopGetMain();
 	
-	dispatch_async(dispatch_get_main_queue(), ^{
-		[assistant showWindow:nil];
+	CFRunLoopPerformBlock(runLoop, kCFRunLoopCommonModes, ^{
+		
+		SMAssistantWindowController *assistant = [[SMAssistantWindowController alloc] initWithPanels:panels completionHandler:callback];
+
+		assistant.window.preventsApplicationTerminationWhenModal = YES;
+		assistant.window.animationBehavior = NSWindowAnimationBehaviorDocumentWindow;
+		
+		[[NSApplication sharedApplication] runModalForWindow:assistant.window];
 	});
 }
 
@@ -161,9 +167,6 @@ NS_ASSUME_NONNULL_BEGIN
 	Class <SMAssistantPanel> class = _panels[0];
 	
 	[self _switchToPanel:[class panelIdentifier] withContent:nil];
-	
-	// Show window.
-	[self.window center];
 }
 
 
@@ -177,7 +180,8 @@ NS_ASSUME_NONNULL_BEGIN
 {
 	// Close window.
 	[self close];
-	
+	[[NSApplication sharedApplication] stopModal];
+
 	// Call cancelation.
 	if ([_currentPanel respondsToSelector:@selector(canceled)])
 		[_currentPanel canceled];
@@ -212,7 +216,8 @@ NS_ASSUME_NONNULL_BEGIN
 		_currentPanel = nil;
 
 		[self close];
-		
+		[[NSApplication sharedApplication] stopModal];
+
 		_selfRetain = nil;
 	}
 	else
