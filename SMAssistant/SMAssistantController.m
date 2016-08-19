@@ -101,6 +101,8 @@ NS_ASSUME_NONNULL_BEGIN
 		
 		[[NSApplication sharedApplication] runModalForWindow:assistant.window];
 	});
+	
+	CFRunLoopWakeUp(runLoop);
 }
 
 @end
