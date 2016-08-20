@@ -61,7 +61,7 @@ NS_ASSUME_NONNULL_BEGIN
 }
 
 // -- Instance --
-- (id)initWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback;
+- (instancetype)initWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback;
 
 // -- Properties --
 @property (strong, nonatomic)	IBOutlet NSTextField	*mainTitle;
@@ -122,7 +122,7 @@ NS_ASSUME_NONNULL_BEGIN
 */
 #pragma mark - SMAssistantWindowController - Instance
 
-- (id)initWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback
+- (instancetype)initWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback
 {
 	self = [super initWithWindowNibName:@"AssistantWindow"];
 	
