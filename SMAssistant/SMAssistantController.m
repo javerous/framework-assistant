@@ -52,7 +52,6 @@ NS_ASSUME_NONNULL_BEGIN
 	id <SMAssistantPanel>	_currentPanel;
 	
 	NSString				*_nextID;
-	BOOL					_isLast;
 	BOOL					_nextDisabled;
 	
 	SMAssistantCompletionBlock	_handler;
@@ -206,7 +205,12 @@ NS_ASSUME_NONNULL_BEGIN
 	
 	id content = [_currentPanel panelContent];
 
-	if (_isLast)
+	if (_nextID)
+	{
+		// Switch.
+		[self _switchToPanel:_nextID withContent:content];
+	}
+	else
 	{
 		if (_handler)
 			_handler(SMAssistantCompletionTypeDone, content);
@@ -216,16 +220,11 @@ NS_ASSUME_NONNULL_BEGIN
 		
 		_handler = nil;
 		_currentPanel = nil;
-
+		
 		[self close];
 		[[NSApplication sharedApplication] stopModal];
-
+		
 		_selfRetain = nil;
-	}
-	else
-	{
-		// Switch.
-		[self _switchToPanel:_nextID withContent:content];
 	}
 }
 
@@ -272,7 +271,6 @@ NS_ASSUME_NONNULL_BEGIN
 	
 	// Set the proxy
 	_nextID = nil;
-	_isLast = YES;
 	[_nextButton setEnabled:NO];
 	[_nextButton setTitle:SMLocalizedString(@"ac_next_finish", @"")];
 	
@@ -295,14 +293,14 @@ NS_ASSUME_NONNULL_BEGIN
 		return;
 	}
 	
-	if (_isLast)
-		[_nextButton setEnabled:YES];
-	else
+	if (_nextID)
 	{
 		Class class = _panelsClass[_nextID];
 		
 		[_nextButton setEnabled:(class != nil)];
 	}
+	else
+		[_nextButton setEnabled:YES];
 }
 
 
@@ -318,20 +316,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 		_nextID = panelID;
 		
-		[self _checkNextButton];
-	});
-}
-
-- (void)setIsLastPanel:(BOOL)last
-{
-	dispatch_async(dispatch_get_main_queue(), ^{
-		
-		_isLast = last;
-		
-		if (_isLast)
-			[_nextButton setTitle:SMLocalizedString(@"ac_next_finish", @"")];
-		else
+		if (_nextID)
 			[_nextButton setTitle:SMLocalizedString(@"ac_next_continue", @"")];
+		else
+			[_nextButton setTitle:SMLocalizedString(@"ac_next_finish", @"")];
 		
 		[self _checkNextButton];
 	});
