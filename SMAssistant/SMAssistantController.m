@@ -271,13 +271,14 @@ NS_ASSUME_NONNULL_BEGIN
 	
 	// Set the proxy
 	_nextID = nil;
-	[_nextButton setEnabled:NO];
-	[_nextButton setTitle:SMLocalizedString(@"ac_next_finish", @"")];
-	
+
 	panel.panelProxy = self;
 	panel.panelPreviousContent = content;
 	
 	[panel panelDidAppear];
+	
+	// Update button.
+	[self _checkNextButton];
 	
 	// Hold the panel
 	_currentPanel = panel;
@@ -287,20 +288,30 @@ NS_ASSUME_NONNULL_BEGIN
 {
 	// > main queue <
 	
+	// Update activation.
 	if (_nextDisabled)
 	{
 		[_nextButton setEnabled:NO];
-		return;
-	}
-	
-	if (_nextID)
-	{
-		Class class = _panelsClass[_nextID];
-		
-		[_nextButton setEnabled:(class != nil)];
 	}
 	else
-		[_nextButton setEnabled:YES];
+	{
+		if (_nextID)
+		{
+			Class class = _panelsClass[_nextID];
+			
+			[_nextButton setEnabled:(class != nil)];
+		}
+		else
+		{
+			[_nextButton setEnabled:YES];
+		}
+	}
+	
+	// Update title.
+	if (_nextID)
+		[_nextButton setTitle:SMLocalizedString(@"ac_next_continue", @"")];
+	else
+		[_nextButton setTitle:SMLocalizedString(@"ac_next_finish", @"")];
 }
 
 
@@ -315,11 +326,6 @@ NS_ASSUME_NONNULL_BEGIN
 	dispatch_async(dispatch_get_main_queue(), ^{
 
 		_nextID = panelID;
-		
-		if (_nextID)
-			[_nextButton setTitle:SMLocalizedString(@"ac_next_continue", @"")];
-		else
-			[_nextButton setTitle:SMLocalizedString(@"ac_next_finish", @"")];
 		
 		[self _checkNextButton];
 	});
