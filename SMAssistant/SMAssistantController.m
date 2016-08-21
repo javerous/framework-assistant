@@ -39,6 +39,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /*
+** Globals
+*/
+#pragma mark - Globals
+
+static char gSpecificQueueKey = '\0';
+static char gMainQueueTag = '\0';
+
+
+
+/*
 ** SMAssistantWindowController - Interface
 */
 #pragma mark - SMAssistantWindowController - Interface
@@ -142,6 +152,9 @@ NS_ASSUME_NONNULL_BEGIN
 		
 		// Handle panels.
 		_panels = panels;
+		
+		// Mark main queue.
+		dispatch_queue_set_specific(dispatch_get_main_queue(), &gSpecificQueueKey, &gMainQueueTag, NULL);
 		
 		// Self retain.
 		_selfRetain = self;
@@ -323,22 +336,28 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)setNextPanelID:(nullable NSString *)panelID
 {
-	dispatch_async(dispatch_get_main_queue(), ^{
-
+	dispatch_block_t block = ^{
 		_nextID = panelID;
-		
 		[self _checkNextButton];
-	});
+	};
+	
+	if (dispatch_get_specific(&gSpecificQueueKey) == &gMainQueueTag)
+		block();
+	else
+		dispatch_async(dispatch_get_main_queue(), block);
 }
 
 - (void)setDisableContinue:(BOOL)disabled
 {
-	dispatch_async(dispatch_get_main_queue(), ^{
-		
+	dispatch_block_t block = ^{
 		_nextDisabled = disabled;
-		
 		[self _checkNextButton];
-	});
+	};
+	
+	if (dispatch_get_specific(&gSpecificQueueKey) == &gMainQueueTag)
+		block();
+	else
+		dispatch_async(dispatch_get_main_queue(), block);
 }
 
 @end
