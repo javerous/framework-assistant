@@ -54,8 +54,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSString *)panelTitle;
 
 // Content.
-- (NSView *)panelView;
-- (nullable id)panelContent;
+@property (nonatomic, readonly,) NSView *panelView;
+@property (nullable, nonatomic, readonly) id panelContent;
 
 // Context.
 @property (strong, nonatomic) id <SMAssistantProxy> panelProxy;

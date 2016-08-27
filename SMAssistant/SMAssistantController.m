@@ -70,7 +70,10 @@ static char gMainQueueTag = '\0';
 }
 
 // -- Instance --
-- (instancetype)initWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback;
+- (instancetype)initWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback NS_DESIGNATED_INITIALIZER;
+
+- (nullable instancetype)initWithCoder:(NSCoder *)coder NS_UNAVAILABLE;
+- (instancetype)initWithWindow:(nullable NSWindow *)window NS_UNAVAILABLE;
 
 // -- Properties --
 @property (strong, nonatomic)	IBOutlet NSTextField	*mainTitle;
@@ -133,7 +136,7 @@ static char gMainQueueTag = '\0';
 
 - (instancetype)initWithPanels:(NSArray *)panels completionHandler:(nullable SMAssistantCompletionBlock)callback
 {
-	self = [super initWithWindowNibName:@"AssistantWindow"];
+	self = [super initWithWindow:nil];
 	
 	if (self)
 	{
@@ -148,7 +151,7 @@ static char gMainQueueTag = '\0';
 		
 		// Handle pannels class.
 		for (Class <SMAssistantPanel> class in panels)
-			[_panelsClass setObject:class forKey:[class panelIdentifier]];
+			_panelsClass[[class panelIdentifier]] = class;
 		
 		// Handle panels.
 		_panels = panels;
@@ -174,6 +177,16 @@ static char gMainQueueTag = '\0';
 ** SMAssistantWindowController - NSWindowController
 */
 #pragma mark - SMAssistantWindowController - NSWindowController
+
+- (nullable NSString *)windowNibName
+{
+	return @"AssistantWindow";
+}
+
+- (id)owner
+{
+	return self;
+}
 
 - (void)windowDidLoad
 {
@@ -271,13 +284,18 @@ static char gMainQueueTag = '\0';
 		
 		panel = [class panelInstance];
 		
-		if (panel)
-			_panelsInstances[panelID] = panel;
+		if (!panel)
+		{
+			_currentPanel = nil;
+			_nextID = nil;
+			return;
+		}
+		
+		_panelsInstances[panelID] = panel;
 	}
 	
 	// Set the view
-	if (panel)
-		[_mainView addSubview:[panel panelView]];
+	[_mainView addSubview:[panel panelView]];
 	
 	// Set the title
 	_mainTitle.stringValue = [[panel class] panelTitle];
@@ -312,7 +330,7 @@ static char gMainQueueTag = '\0';
 		{
 			Class class = _panelsClass[_nextID];
 			
-			[_nextButton setEnabled:(class != nil)];
+			_nextButton.enabled = (class != nil);
 		}
 		else
 		{
