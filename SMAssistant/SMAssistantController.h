@@ -31,11 +31,10 @@ NS_ASSUME_NONNULL_BEGIN
 */
 #pragma mark - Types
 
-typedef enum
-{
+typedef NS_ENUM(unsigned int, SMAssistantCompletionType) {
 	SMAssistantCompletionTypeCanceled,	// context = nil
 	SMAssistantCompletionTypeDone		// context = last panel returned content.
-} SMAssistantCompletionType;
+};
 
 typedef void (^SMAssistantCompletionBlock)(SMAssistantCompletionType type, id _Nullable context);
 
