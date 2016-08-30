@@ -67,6 +67,8 @@ static char gMainQueueTag = '\0';
 	SMAssistantCompletionBlock	_handler;
 	
 	SMAssistantWindowController *_selfRetain;
+	
+	NSModalSession _modalSession;
 }
 
 // -- Instance --
@@ -86,6 +88,8 @@ static char gMainQueueTag = '\0';
 - (IBAction)doNext:(id)sender;
 
 // -- Tools --
+- (void)_startModal;
+
 - (void)_switchToPanel:(NSString *)panelID withContent:(nullable id)content;
 - (void)_checkNextButton;
 
@@ -108,10 +112,7 @@ static char gMainQueueTag = '\0';
 		
 		SMAssistantWindowController *assistant = [[SMAssistantWindowController alloc] initWithPanels:panels completionHandler:callback];
 
-		assistant.window.preventsApplicationTerminationWhenModal = YES;
-		assistant.window.animationBehavior = NSWindowAnimationBehaviorDocumentWindow;
-		
-		[[NSApplication sharedApplication] runModalForWindow:assistant.window];
+		[assistant _startModal];
 	});
 	
 	CFRunLoopWakeUp(runLoop);
@@ -206,8 +207,7 @@ static char gMainQueueTag = '\0';
 - (IBAction)doCancel:(id)sender
 {
 	// Close window.
-	[self close];
-	[[NSApplication sharedApplication] stopModal];
+	[self _closeWindow];
 
 	// Call cancelation.
 	if ([_currentPanel respondsToSelector:@selector(canceled)])
@@ -216,9 +216,6 @@ static char gMainQueueTag = '\0';
 	// Call cancel handler.
 	if (_handler)
 		_handler(SMAssistantCompletionTypeCanceled, nil);
-
-	// Remove self retain.
-	_selfRetain = nil;
 }
 
 - (IBAction)doNext:(id)sender
@@ -247,10 +244,7 @@ static char gMainQueueTag = '\0';
 		_handler = nil;
 		_currentPanel = nil;
 		
-		[self close];
-		[[NSApplication sharedApplication] stopModal];
-		
-		_selfRetain = nil;
+		[self _closeWindow];
 	}
 }
 
@@ -260,6 +254,31 @@ static char gMainQueueTag = '\0';
 ** SMAssistantWindowController - Tools
 */
 #pragma mark - SMAssistantWindowController - Tools
+
+- (void)_startModal
+{
+	self.window.preventsApplicationTerminationWhenModal = YES;
+	self.window.animationBehavior = NSWindowAnimationBehaviorDocumentWindow;
+	
+	_modalSession = [[NSApplication sharedApplication] beginModalSessionForWindow:self.window];
+	
+	[[NSApplication sharedApplication] runModalSession:_modalSession];
+}
+
+- (void)_closeWindow
+{
+	// > main queue <
+	
+	if (!_modalSession)
+		return;
+	
+	[self close];
+	
+	[[NSApplication sharedApplication] endModalSession:_modalSession];
+	
+	_modalSession = NULL;
+	_selfRetain = nil;
+}
 
 - (void)_switchToPanel:(NSString *)panelID withContent:(nullable id)content
 {
