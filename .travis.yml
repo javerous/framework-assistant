@@ -1,0 +1,7 @@
+language: objective-c
+xcode_project: SMAssistant.xcodeproj
+xcode_scheme: SMAssistant
+osx_image: xcode8.3
+
+script:
+    - xcodebuild clean build -project SMAssistant.xcodeproj -scheme SMAssistant CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
