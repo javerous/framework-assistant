@@ -184,7 +184,7 @@ static char gMainQueueTag = '\0';
 	return @"AssistantWindow";
 }
 
-- (id)owner
+- (nullable id)owner
 {
 	return self;
 }
